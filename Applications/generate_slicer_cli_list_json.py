@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
   for cli in cli_list:
 
-    if os.path.join(appdir, cli, cli + '.py'):
+    if os.path.isfile(os.path.join(appdir, cli, cli + '.py')):
 
       slicer_cli_list_json[cli] = {'type': 'python'}
 
