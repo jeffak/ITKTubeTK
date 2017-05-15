@@ -46,10 +46,14 @@ RUN git config --global advice.detachedHead false
 
 # Download/configure/build/install TubeTK
 ENV TubeTK_SRC_DIR=$PWD/TubeTK
-RUN mkdir -p $TubeTK_SRC_DIR
-COPY . $TubeTK_SRC_DIR
 ENV TubeTK_BUILD_DIR=$TubeTK_SRC_DIR/build
-RUN mkdir -p $TubeTK_BUILD_DIR
+
+RUN mkdir -p $TubeTK_SRC_DIR && mkdir -p $TubeTK_BUILD_DIR && \
+    cd $TubeTK_SRC_DIR && \
+    pip install -U -r requirements.txt
+
+COPY . $TubeTK_SRC_DIR
+
 WORKDIR $TubeTK_BUILD_DIR
 
 RUN cmake \
