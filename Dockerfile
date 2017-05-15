@@ -78,5 +78,5 @@ WORKDIR $TubeTK_SRC_DIR/Applications
 RUN python /build/slicer_cli_web/server/cli_list_entrypoint.py --list_cli
 
 # Set entrypoint
-ENTRYPOINT["/build/miniconda/bin/python", "/build/slicer_cli_web/server/cli_list_entrypoint.py"]
+ENTRYPOINT ["/build/miniconda/bin/python", "/build/slicer_cli_web/server/cli_list_entrypoint.py"]
 
