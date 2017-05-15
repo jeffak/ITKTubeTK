@@ -47,20 +47,23 @@ RUN git config --global advice.detachedHead false
 # Download/configure/build/install TubeTK
 ENV TubeTK_SRC_DIR=$PWD/TubeTK
 ENV TubeTK_BUILD_DIR=$TubeTK_SRC_DIR/build
-
-RUN mkdir -p $TubeTK_SRC_DIR && mkdir -p $TubeTK_BUILD_DIR && \
-    cd $TubeTK_SRC_DIR && \
-    pip install -U -r requirements.txt
-
+RUN mkdir -p $TubeTK_SRC_DIR && mkdir -p $TubeTK_BUILD_DIR
 COPY . $TubeTK_SRC_DIR
-
 WORKDIR $TubeTK_BUILD_DIR
 
-RUN cmake \
+RUN pip install -U -r $TubeTK_SRC_DIR/requirements.txt && \
+    cmake \
         -G Ninja \
-        -DBUILD_TESTING:BOOL=OFF \
         -DTubeTK_BUILD_APPLICATIONS:BOOL=ON \
         -DTubeTK_USE_PYTHON:BOOL=ON \
+        -DBUILD_TESTING:BOOL=OFF \
+        -DTubeTK_USE_ARRAYFIRE:BOOL=OFF \
+        -DTubeTK_USE_EXAMPLES_AS_TESTS:BOOL=OFF
+        -DTubeTK_USE_BOOST:BOOL=OFF \
+        -DTubeTK_USE_PYQTGRAPH:BOOL=OFF \
+        -DTubeTK_USE_VALGRIND:BOOL=OFF \
+        -DUSE_SYSTEM_ITK:BOOL=OFF \
+        -DUSE_SYSTEM_SLICER_EXECUTION_MODEL:BOOL=OFF \
         ../ && \
     ninja && \
     cd $TubeTK_SRC_DIR/Applications && \
