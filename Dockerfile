@@ -6,9 +6,9 @@ RUN apt-get update && \
     apt-get install -y \
     build-essential \
     wget \
-    git \
-    emacs vim \
+    emacs vim git \
     make cmake cmake-curses-gui \
+    libxt-dev libgl1-mesa-dev \
     ninja-build && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -51,20 +51,23 @@ RUN mkdir -p $TubeTK_SRC_DIR && mkdir -p $TubeTK_BUILD_DIR
 COPY . $TubeTK_SRC_DIR
 WORKDIR $TubeTK_BUILD_DIR
 
-RUN pip install --upgrade --ignore-installed pip && \
-    pip install -U -r $TubeTK_SRC_DIR/requirements.txt && \
-    cmake \
+RUN cmake \
         -G Ninja \
         -DTubeTK_BUILD_APPLICATIONS:BOOL=ON \
         -DTubeTK_USE_PYTHON:BOOL=ON \
+        -DBUILD_SHARED_LIBS:BOOL=ON \
+        -DTubeTK_USE_VTK:BOOL=ON \
         -DBUILD_TESTING:BOOL=OFF \
+        -DTubeTK_BUILD_USING_SLICER:BOOL=OFF \
         -DTubeTK_USE_ARRAYFIRE:BOOL=OFF \
         -DTubeTK_USE_EXAMPLES_AS_TESTS:BOOL=OFF \
         -DTubeTK_USE_BOOST:BOOL=OFF \
         -DTubeTK_USE_PYQTGRAPH:BOOL=OFF \
+        -DTubeTK_USE_NUMPY_STACK:BOOL=OFF \
         -DTubeTK_USE_VALGRIND:BOOL=OFF \
         -DUSE_SYSTEM_ITK:BOOL=OFF \
         -DUSE_SYSTEM_SLICER_EXECUTION_MODEL:BOOL=OFF \
+        -DUSE_SYSTEM_VTK:BOOL=OFF \
         ../ && \
     ninja && \
     cd $TubeTK_SRC_DIR/Applications && \
