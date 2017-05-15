@@ -51,7 +51,8 @@ RUN mkdir -p $TubeTK_SRC_DIR && mkdir -p $TubeTK_BUILD_DIR
 COPY . $TubeTK_SRC_DIR
 WORKDIR $TubeTK_BUILD_DIR
 
-RUN pip install -U -r $TubeTK_SRC_DIR/requirements.txt && \
+RUN pip install --upgrade --ignore-installed pip && \
+    pip install -U -r $TubeTK_SRC_DIR/requirements.txt && \
     cmake \
         -G Ninja \
         -DTubeTK_BUILD_APPLICATIONS:BOOL=ON \
