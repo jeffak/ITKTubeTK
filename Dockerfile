@@ -58,7 +58,7 @@ RUN pip install -U -r $TubeTK_SRC_DIR/requirements.txt && \
         -DTubeTK_USE_PYTHON:BOOL=ON \
         -DBUILD_TESTING:BOOL=OFF \
         -DTubeTK_USE_ARRAYFIRE:BOOL=OFF \
-        -DTubeTK_USE_EXAMPLES_AS_TESTS:BOOL=OFF
+        -DTubeTK_USE_EXAMPLES_AS_TESTS:BOOL=OFF \
         -DTubeTK_USE_BOOST:BOOL=OFF \
         -DTubeTK_USE_PYQTGRAPH:BOOL=OFF \
         -DTubeTK_USE_VALGRIND:BOOL=OFF \
