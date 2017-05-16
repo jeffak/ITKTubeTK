@@ -80,6 +80,7 @@ RUN conda install --yes -c cdeepakroy ctk-cli=1.4.1
 # Download and install slicer_cli_web
 RUN cd $BUILD_PATH && \
     git clone https://github.com/girder/slicer_cli_web.git && \
+    cd slicer_cli_web && \
     git checkout take_cpp_cli_from_path
 
 # Set workdir to TubeTK Applications
