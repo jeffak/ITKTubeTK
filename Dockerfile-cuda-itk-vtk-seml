@@ -46,13 +46,13 @@ RUN git config --global advice.detachedHead false
 
 # Download/configure/build/install ITK
 ENV ITK_GIT_TAG v4.11.1
-RUN cd $BUILD_PATH && git clone --depth 1 -b ${ITK_GIT_TAG} git://github.com/InsightSoftwareConsortium/ITK.git && \
+RUN cd $BUILD_PATH && git clone --depth 1 -b ${ITK_GIT_TAG} https://github.com/InsightSoftwareConsortium/ITK.git && \
     mkdir ITK-build && \
     cd ITK-build && \
     cmake \
         -G Ninja \
         -DCMAKE_INSTALL_PREFIX:PATH=/usr \
-        -DCMAKE_BUILD_TYPE:STRING=Release
+        -DCMAKE_BUILD_TYPE:STRING=Release \
         -DBUILD_SHARED_LIBS:BOOL=ON \
         -DBUILD_EXAMPLES:BOOL=OFF \
         -DBUILD_TESTING:BOOL=OFF \
@@ -65,20 +65,19 @@ RUN cd $BUILD_PATH && git clone --depth 1 -b ${ITK_GIT_TAG} git://github.com/Ins
         -DModule_MinimalPathExtraction:BOOL=ON \
         -DKWSYS_USE_MD5:BOOL=ON \
         -DModule_ITKReview:BOOL=ON \
-        -DITK_LEGACY_REMOVE:BOOL=ON
         ../ITK && \
     ninja install && \
     cd $BUILD_PATH && rm -rf ITK ITK-build
 
 # Download/configure/build/install VTK
 ENV VTK_GIT_TAG v7.1.1
-RUN cd $BUILD_PATH && git clone --depth 1 -b ${VTK_GIT_TAG} git@github.com:Kitware/VTK.git && \
+RUN cd $BUILD_PATH && git clone --depth 1 -b ${VTK_GIT_TAG} https://github.com/Kitware/VTK.git && \
     mkdir VTK-build && \
     cd VTK-build && \
     cmake \
         -G Ninja \
         -DCMAKE_INSTALL_PREFIX:PATH=/usr \
-        -DCMAKE_BUILD_TYPE:STRING=Release
+        -DCMAKE_BUILD_TYPE:STRING=Release \
         -DBUILD_SHARED_LIBS:BOOL=ON \
         -DBUILD_EXAMPLES:BOOL=OFF \
         -DBUILD_TESTING:BOOL=OFF \
@@ -90,7 +89,7 @@ RUN cd $BUILD_PATH && git clone --depth 1 -b ${VTK_GIT_TAG} git@github.com:Kitwa
 # Download/confogure/build/install SlicerExecutionModel
 ENV SEM_GIT_TAG 61bb14d57ff45c8de0f506e23b6ec982fcdf0da2
 RUN cd $BUILD_PATH && \
-    git clone git://github.com/Slicer/SlicerExecutionModel.git && \
+    git clone https://github.com/Slicer/SlicerExecutionModel.git && \
     (cd SlicerExecutionModel && git checkout ${SEM_GIT_TAG}) && \
     mkdir SEM-build && cd SEM-build && \
     cmake \
