@@ -4,17 +4,14 @@ MAINTAINER Deepak Roy Chittajallu <deepk.chittajallu@kitware.com>
 # Install system pre-requisites
 RUN apt-get update && \
     apt-get install -y \
-    build-essential \
-    wget \
-    emacs vim git \
-    make cmake cmake-curses-gui \
-    libxt-dev libgl1-mesa-dev \
-    ninja-build && \
+    build-essential wget \
+    git make cmake cmake-curses-gui ninja-build \
+    libxt-dev libgl1-mesa-dev && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Libraries build path
-ENV BUILD_PATH=/build
+ENV BUILD_PATH /build
 
 # Install miniconda
 RUN mkdir -p $BUILD_PATH && \
@@ -24,8 +21,7 @@ RUN mkdir -p $BUILD_PATH && \
     rm $BUILD_PATH/install_miniconda.sh && \
     chmod -R +r $BUILD_PATH && \
     chmod +x $BUILD_PATH/miniconda/bin/python
-ENV PATH=$BUILD_PATH/miniconda/bin:${PATH}
-
+ENV PATH $BUILD_PATH/miniconda/bin:${PATH}
 
 # Install CMake
 ENV CMAKE_ARCHIVE_SHA256 10ca0e25b7159a03da0c1ec627e686562dc2a40aad5985fd2088eb684b08e491
@@ -39,19 +35,19 @@ RUN cd $BUILD_PATH && \
   [ $hash = "${CMAKE_ARCHIVE_SHA256}" ] && \
   tar -xzvf cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz && \
   rm cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz
-ENV PATH=$BUILD_PATH/cmake-${CMAKE_VERSION}-Linux-x86_64/bin:${PATH}
+ENV PATH $BUILD_PATH/cmake-${CMAKE_VERSION}-Linux-x86_64/bin:${PATH}
 
 # Disable "You are in 'detached HEAD' state." warning
 RUN git config --global advice.detachedHead false
 
 # Download/configure/build/install ITK
 ENV ITK_GIT_TAG v4.11.1
+ENV ITK_BUILD_DIR $BUILD_PATH/ITK-build
 RUN cd $BUILD_PATH && git clone --depth 1 -b ${ITK_GIT_TAG} https://github.com/InsightSoftwareConsortium/ITK.git && \
     mkdir ITK-build && \
     cd ITK-build && \
     cmake \
         -G Ninja \
-        -DCMAKE_INSTALL_PREFIX:PATH=/usr \
         -DCMAKE_BUILD_TYPE:STRING=Release \
         -DBUILD_SHARED_LIBS:BOOL=ON \
         -DBUILD_EXAMPLES:BOOL=OFF \
@@ -66,47 +62,56 @@ RUN cd $BUILD_PATH && git clone --depth 1 -b ${ITK_GIT_TAG} https://github.com/I
         -DKWSYS_USE_MD5:BOOL=ON \
         -DModule_ITKReview:BOOL=ON \
         ../ITK && \
-    ninja install && \
-    cd $BUILD_PATH && rm -rf ITK ITK-build
+    ninja && \
+    cp Wrapping/Generators/Python/WrapITK.pth $BUILD_PATH/miniconda/lib/python2.7/site-packages && \
+    python -c "import itk" && \
+    find . -name '*.o' -delete && \
+    find ../ITK* -depth -name .git -exec rm -rf '{}' \;
 
 # Download/configure/build/install VTK
 ENV VTK_GIT_TAG v7.1.1
+ENV VTK_BUILD_DIR $BUILD_PATH/VTK-build
 RUN cd $BUILD_PATH && git clone --depth 1 -b ${VTK_GIT_TAG} https://github.com/Kitware/VTK.git && \
     mkdir VTK-build && \
     cd VTK-build && \
     cmake \
         -G Ninja \
-        -DCMAKE_INSTALL_PREFIX:PATH=/usr \
         -DCMAKE_BUILD_TYPE:STRING=Release \
         -DBUILD_SHARED_LIBS:BOOL=ON \
         -DBUILD_EXAMPLES:BOOL=OFF \
         -DBUILD_TESTING:BOOL=OFF \
         -DVTK_LEGACY_REMOVE:BOOL=ON \
+        -DVTK_WRAP_PYTHON:BOOL=ON \
         ../VTK && \
-    ninja install && \
-    cd $BUILD_PATH && rm -rf VTK VTK-build
+    ninja && \
+    echo "${VTK_BUILD_DIR}/lib" > $BUILD_PATH/miniconda/lib/python2.7/site-packages/WrapVTK.pth && \
+    echo "${VTK_BUILD_DIR}/Wrapping/Python" >> $BUILD_PATH/miniconda/lib/python2.7/site-packages/WrapVTK.pth && \
+    python -c "import vtk" && \
+    find . -name '*.o' -delete && \
+    find ../VTK* -depth -name .git -exec rm -rf '{}' \;
 
-# Download/confogure/build/install SlicerExecutionModel
+# Download/configure/build/install SlicerExecutionModel
 ENV SEM_GIT_TAG 61bb14d57ff45c8de0f506e23b6ec982fcdf0da2
+ENV SEM_BUILD_DIR $BUILD_PATH/SEM-build
 RUN cd $BUILD_PATH && \
-    git clone https://github.com/Slicer/SlicerExecutionModel.git && \
-    (cd SlicerExecutionModel && git checkout ${SEM_GIT_TAG}) && \
+    git clone https://github.com/Slicer/SlicerExecutionModel.git SEM && \
+    (cd SEM && git checkout ${SEM_GIT_TAG}) && \
     mkdir SEM-build && cd SEM-build && \
     cmake \
         -G Ninja \
-        -DCMAKE_INSTALL_PREFIX:PATH=/usr \
         -DCMAKE_BUILD_TYPE:STRING=Release \
         -DBUILD_SHARED_LIBS:BOOL=ON \
         -DBUILD_TESTING:BOOL=OFF \
-        ../SlicerExecutionModel && \
-    ninja install && \
-    cd $BUILD_PATH && rm -rf SEM SEM-build
-
-# Install ctk-cli
-RUN conda install --yes -c cdeepakroy ctk-cli=1.4.1
+        -DITK_DIR:PATH=$BUILD_PATH/ITK-build \
+        ../SEM && \
+    ninja && \
+    find . -name '*.o' -delete && \
+    find ../SEM* -depth -name .git -exec rm -rf '{}' \;
 
 # Download and install slicer_cli_web
 RUN cd $BUILD_PATH && \
     git clone https://github.com/girder/slicer_cli_web.git && \
     cd slicer_cli_web && \
-    git checkout take_cpp_cli_from_path
+    git checkout take_cpp_cli_from_path && \
+    conda install --yes -c cdeepakroy ctk-cli=1.4.1 && \
+    find . -depth -name .git -exec rm -rf '{}' \;

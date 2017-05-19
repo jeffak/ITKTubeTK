@@ -1,4 +1,4 @@
-FROM kitwaremedical/cuda-itk-vtk-seml
+FROM kitwaremedical/cuda-itk-vtk-sem
 MAINTAINER Deepak Roy Chittajallu <deepk.chittajallu@kitware.com>
 
 # Download/configure/build/install TubeTK
@@ -16,20 +16,25 @@ RUN cmake \
         -DTubeTK_USE_VTK:BOOL=ON \
         -DBUILD_TESTING:BOOL=OFF \
         -DTubeTK_BUILD_USING_SLICER:BOOL=OFF \
-        -DTubeTK_USE_ARRAYFIRE:BOOL=ON \
+        -DTubeTK_USE_ARRAYFIRE:BOOL=OFF \
         -DTubeTK_USE_EXAMPLES_AS_TESTS:BOOL=OFF \
         -DTubeTK_USE_BOOST:BOOL=OFF \
         -DTubeTK_USE_PYQTGRAPH:BOOL=OFF \
         -DTubeTK_USE_NUMPY_STACK:BOOL=OFF \
         -DTubeTK_USE_VALGRIND:BOOL=OFF \
         -DUSE_SYSTEM_ITK:BOOL=ON \
-        -DUSE_SYSTEM_SLICER_EXECUTION_MODEL:BOOL=ON \
+        -DITK_DIR:PATH=$BUILD_PATH/ITK-build \
         -DUSE_SYSTEM_VTK:BOOL=ON \
+        -DVTK_DIR:PATH=$BUILD_PATH/VTK-build \
+        -DUSE_SYSTEM_SLICER_EXECUTION_MODEL:BOOL=ON \
+        -DSlicerExecutionModel_DIR:PATH=$BUILD_PATH/SEM-build \
         ../ && \
     ninja && \
+    find . -name "*.o" -delete && \
+    find ../TubeTK* -depth -name .git -exec rm -rf '{}' \; && \
     cd $TubeTK_SRC_DIR/Applications && \
     python generate_slicer_cli_list_json.py
-ENV PATH="${TubeTK_BUILD_DIR}/TubeTK-build/bin/:${PATH}"
+ENV PATH="${TubeTK_BUILD_DIR}/TubeTK-build/bin:${PATH}"
 
 # Set workdir to TubeTK Applications
 WORKDIR $TubeTK_SRC_DIR/Applications
@@ -39,4 +44,3 @@ RUN python /build/slicer_cli_web/server/cli_list_entrypoint.py --list_cli
 
 # Set entrypoint
 ENTRYPOINT ["/build/miniconda/bin/python", "/build/slicer_cli_web/server/cli_list_entrypoint.py"]
-
