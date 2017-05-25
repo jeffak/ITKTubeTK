@@ -1,12 +1,12 @@
-FROM nvidia/cuda
+FROM nvidia/cuda:8.0-cudnn5-runtime-ubuntu16.04
 MAINTAINER Deepak Roy Chittajallu <deepk.chittajallu@kitware.com>
 
 # Install system pre-requisites
 RUN apt-get update && \
     apt-get install -y \
-    build-essential wget \
-    git make cmake cmake-curses-gui ninja-build \
-    libxt-dev libgl1-mesa-dev && \
+    build-essential wget git \
+    make cmake cmake-curses-gui ninja-build \
+    libxt-dev libgl1-mesa-dev libcupti-dev && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
