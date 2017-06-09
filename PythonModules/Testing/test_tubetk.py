@@ -42,11 +42,9 @@ sys.path.append( os.path.join(TubeTK_BUILD_DIR, 'lib') )
 sys.path.append( os.path.join(TubeTK_BUILD_DIR, 'PythonModules') )
 
 def VesselTubeToNumPyTest(tubes, baseline_array):
-    print 'helloooooooooooooooooo'
     import numpy as np
     from tubetk.numpy import tubes_from_file
 
-    print tubes
     array = tubes_from_file(tubes)
     print(array.dtype)
     print(array)
